@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+<meta charset="UTF-8">
+<title>Moonai</title>
+<style>
+body {
+  margin: 0;
+  background: #0b0f2a;
+  font-family: sans-serif;
+  color: white;
+}
+.chat {
+  height: 80vh;
+  overflow:auto;
+  padding: 20px;
+}
+.msg {
+  background: rgba(255,255,255,0.1);
+  backdrop-filter: blur(10px);
+  padding: 12px;
+  border-radius: 15px;
+  margin-bottom: 10px;
+}
+.inputBox {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  display: flex;
+}
+input {
+  flex: 1;
+  padding: 15px;
+  border: none;
+}
+button {
+  padding: 15px;
+}
+</style>
+</head>
+<body>
+
+<div class="chat" id="chat"></div>
+
+<div class="inputBox">
+<input id="inp" placeholder="پیام خود را بنویسید...">
+<button onclick="send()">ارسال</button>
+</div>
+
+<script>
+const workerURL = "YOUR_WORKER_URL_HERE"; // بعداً لینک Cloudflare Worker
+
+async function send() {
+  const inpEl = document.getElementById("inp");
+  const chatEl = document.getElementById("chat");
+  let msg = inpEl.value;
+  if(!msg) return;
+  chatEl.innerHTML += `<div class="msg">شما: ${msg}</div>`;
+  inpEl.value = "";
+
+  // ارسال به Worker
+  let res = await fetch(workerURL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ message: msg })
+  });
+  let data = await res.json();
+  chatEl.innerHTML += `<div class="msg">AI: ${data.reply}</div>`;
+  chatEl.scrollTop = chatEl.scrollHeight;
+}
+</script>
+
+</body>
+</html>
